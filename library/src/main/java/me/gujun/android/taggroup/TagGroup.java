@@ -13,6 +13,9 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ArrowKeyMovementMethod;
@@ -737,6 +740,21 @@ public class TagGroup extends ViewGroup {
             if (state == STATE_INPUT) {
                 requestFocus();
 
+                Editable e = getEditableText();
+                if ( e != null) {
+                    e.setFilters(new InputFilter[]{new InputFilter() {
+                        @Override
+                        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                            for (int i = start; i < end; i++) {
+                                if (Character.isSpaceChar(source.charAt(i))) {
+                                    return "";
+                                }
+                            }
+                            return null;
+                        }
+                    }});
+                }
+
                 // Handle the ENTER key down.
                 setOnEditorActionListener(new OnEditorActionListener() {
                     @Override
@@ -807,6 +825,8 @@ public class TagGroup extends ViewGroup {
                     public void afterTextChanged(Editable s) {
                     }
                 });
+
+                setRawInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
             }
 
             invalidatePaint();
